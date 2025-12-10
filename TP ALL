@@ -1,0 +1,187 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+int pgcd_etapes(int a, int b) {
+    printf("\n--- Calcul du PGCD par algorithme d’Euclide ---\n");
+    while (b != 0) {
+        int q = a / b;
+        int r = a % b;
+        printf("%d = %d * %d + %d\n", a, b, q, r);
+        a = b;
+        b = r;
+    }
+    printf("PGCD = %d\n", a);
+    return a;
+}
+
+int bezout_etapes(int a, int b, int *x, int *y) {
+    int x1 = 1, y1 = 0;
+    int x2 = 0, y2 = 1;
+    int q, r;
+
+    printf("\n--- Calcul des coefficients de Bezout ---\n");
+    while (b != 0) {
+        q = a / b;
+        r = a % b;
+        printf("a = %d, b = %d, q = %d, r = %d\n", a, b, q, r);
+        int tx = x1 - q * x2;
+        int ty = y1 - q * y2;
+        printf("x = %d - %d * %d = %d\n", x1, q, x2, tx);
+        printf("y = %d - %d * %d = %d\n", y1, q, y2, ty);
+
+        a = b; b = r;
+        x1 = x2; x2 = tx;
+        y1 = y2; y2 = ty;
+    }
+    *x = x1; *y = y1;
+    printf("PGCD = %d\n", a);
+    printf("Coefficients de Bezout : x = %d, y = %d\n", *x, *y);
+    return a;
+}
+
+void diophantienne(int a, int b, int c) {
+    int x0, y0;
+
+    int d = pgcd_etapes(a, b);
+
+    if (c % d != 0) {
+        printf("Pas de solution car %d ne divise pas %d\n", d, c);
+        return;
+    }
+
+    bezout_etapes(a, b, &x0, &y0);
+
+    int xp = x0 * (c / d);
+    int yp = y0 * (c / d);
+
+    printf("\nSolution particuliere : x = %d, y = %d\n", xp, yp);
+
+    printf("Solution generale :\n");
+    printf("x = %d + %d*k\n", xp, b / d);
+    printf("y = %d - %d*k\n", yp, a / d);
+}
+
+void pgcd3_etapes() {
+    int a, b, c;
+    printf("Entrer trois nombres a, b et c : ");
+    scanf("%d %d %d", &a, &b, &c);
+
+    printf("\n--- Calcul du PGCD de %d et %d ---\n", a, b);
+    int d1 = pgcd_etapes(a, b); 
+
+    printf("\n--- Calcul du PGCD de %d et %d ---\n", d1, c);
+    int d_final = pgcd_etapes(d1, c); 
+
+    printf("\nPGCD(%d, %d, %d) = %d\n", a, b, c, d_final);
+}
+
+void crible_eratosthene(int n) {
+    bool premier[n + 1];
+    for (int i = 0; i <= n; i++) premier[i] = true;
+    premier[0] = false;
+    premier[1] = false;
+
+    printf("\n--- Crible d'Eratosthene ---\n");
+    for (int i = 2; i * i <= n; i++) {
+        if (premier[i]) {
+            printf("Multiples de %d elimines : ", i);
+            for (int j = i * i; j <= n; j += i) {
+                if (premier[j]) {
+                    premier[j] = false;
+                    printf("%d ", j);
+                }
+            }
+            printf("\n");
+        }
+    }
+
+    printf("\nNombres premiers jusqu'a %d : ", n);
+    for (int i = 2; i <= n; i++) {
+        if (premier[i]) printf("%d ", i);
+    }
+    printf("\n");
+}
+
+int ppcm_etapes(int a, int b) {
+    printf("\n--- Calcul du PPCM ---\n");
+
+    printf("Etape 1 : Calcul du PGCD(%d, %d)\n", a, b);
+    int d = pgcd_etapes(a, b);
+
+    printf("\nEtape 2 : Calcul du PPCM avec la formule : |a*b| / PGCD\n");
+    printf("PPCM = |%d * %d| / %d\n", a, b, d);
+
+    int ppcm = (a * b) / d;
+
+    printf("PPCM = %d\n", ppcm);
+    return ppcm;
+}
+
+int main() {
+    int choix;
+
+    do {
+        printf("\nChoisissez une operation:\n");
+        printf("1 - PGCD\n");
+        printf("2 - Coefficients de Bezout\n");
+        printf("3 - Equation diophantienne lineaire\n");
+        printf("4 - Nombres premiers par crible d Eratosthene\n");
+        printf("5 - PPCM\n");
+        printf("6 - PGCD de trois nombres avec etapes\n");
+        printf("0 - Quitter\n");
+        printf("Votre choix: ");
+        scanf("%d", &choix);
+
+        int a, b, c;
+
+        switch (choix) {
+            case 1:
+                printf("Entrer a et b: ");
+                scanf("%d%d", &a, &b);
+                pgcd_etapes(a, b);
+                break;
+
+            case 2:
+                printf("Entrer a et b: ");
+                scanf("%d%d", &a, &b);
+                {
+                    int x, y;
+                    bezout_etapes(a, b, &x, &y);
+                }
+                break;
+
+            case 3:
+                printf("Entrer a, b et c: ");
+                scanf("%d%d%d", &a, &b, &c);
+                diophantienne(a, b, c);
+                break;
+
+            case 4:
+                printf("Entrer la limite n: ");
+                scanf("%d", &a);
+                crible_eratosthene(a);
+                break;
+
+            case 5:
+                printf("Entrer a et b: ");
+                scanf("%d%d", &a, &b);
+                ppcm_etapes(a, b);
+                break;
+
+            case 6:
+                pgcd3_etapes(); 
+                break;
+
+            case 0:
+                printf("Au revoir!\n");
+                break;
+
+            default:
+                printf("Choix invalide.\n");
+                break;
+        }
+
+    } while (choix != 0);
+
+    return 0;
+}
